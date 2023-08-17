@@ -36,7 +36,6 @@ const createWorkout = async (req, res) => {
     } catch (error) {
         res.status(404).json({error: error.message})
     }
-    res.json({mssg: 'POST a new workout'})
 }
 
 // delete a workout
