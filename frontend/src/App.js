@@ -1,9 +1,12 @@
-import { Routes, Route, Navigate } from "react-router-dom"; 
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useEffect, useState } from 'react';
 import { useAuthContext } from "./hooks/useAuthContext";
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Navbar from './components/Navbar'
+import ChatUI from './pages/Chat/index'
+import MessengerDemo from './pages/Messenger'
 
 function App() {
   const { user } = useAuthContext()
@@ -15,8 +18,12 @@ function App() {
           <Routes>
             <Route 
               path='/'
-              element={user ? <Home /> : <Navigate to='/login'/>}
+              element={!user ? <MessengerDemo /> : <Navigate to='/login'/>}
             />
+            {/* <Route 
+              path='/'
+              element={user ? <Home /> : <Navigate to='/login'/>}
+            /> */}
             <Route 
               path='/login'
               element={!user ? <Login /> : <Navigate to='/'/>}
@@ -24,6 +31,10 @@ function App() {
             <Route 
               path='/signup'
               element={!user ? <Signup /> : <Navigate to='/'/>}
+            />
+            <Route 
+              path='/room'
+              element={!user ? <Navigate to='/'/> : <ChatUI />}
             />
           </Routes>
         </div>
