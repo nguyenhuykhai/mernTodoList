@@ -5,7 +5,7 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Navbar from './components/Navbar'
-import ChatUI from './pages/Chat/index'
+import ChatUI from './pages/Chat'
 import MessengerDemo from './pages/Messenger'
 
 function App() {
@@ -18,12 +18,8 @@ function App() {
           <Routes>
             <Route 
               path='/'
-              element={!user ? <MessengerDemo /> : <Navigate to='/login'/>}
-            />
-            {/* <Route 
-              path='/'
               element={user ? <Home /> : <Navigate to='/login'/>}
-            /> */}
+            />
             <Route 
               path='/login'
               element={!user ? <Login /> : <Navigate to='/'/>}
@@ -34,7 +30,7 @@ function App() {
             />
             <Route 
               path='/room'
-              element={!user ? <Navigate to='/'/> : <ChatUI />}
+              element={user ? <ChatUI /> : <Navigate to='/'/>}
             />
           </Routes>
         </div>

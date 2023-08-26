@@ -1,5 +1,5 @@
 const express = require('express')
-const { createChat, getChats } = require('../controllers/chatController')
+const { createChat, getChats, updateChatWithNewMessage } = require('../controllers/chatController')
 const requireAuth = require('../middleware/requireAuth')
 
 const router = express.Router()
@@ -11,6 +11,9 @@ router.use(requireAuth)
 router.post('/createChat', createChat)
 
 // find all chats in account
-router.get('/getChats/:id', getChats)
+router.get('/:id', getChats)
+
+// add message to chat
+router.put('/addMessage', updateChatWithNewMessage) 
  
 module.exports = router

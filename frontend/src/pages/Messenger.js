@@ -6,6 +6,7 @@ import {
   TextField,
   Button,
   Typography,
+  Stack,
   Grid,
   Paper,
   Badge,
@@ -17,10 +18,11 @@ import {
   Divider,
   AppBar,
   Container,
-  InputBase
+  InputBase,
+  Chip,
 } from "@mui/material";
-import IconButton from '@mui/material/IconButton';
-import SendIcon from '@mui/icons-material/Send';
+import IconButton from "@mui/material/IconButton";
+import SendIcon from "@mui/icons-material/Send";
 
 const MessengerDemo = () => {
   return (
@@ -120,61 +122,38 @@ const MessengerDemo = () => {
           <Divider variant="inset" component="li" />
           <Container>
             <Box sx={{ marginTop: 5, overflowY: "scroll", height: 450 }}>
-              Cras mattis consectetur purus sit amet fermentum. Cras justo odio,
-              dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta
-              ac consectetur ac, vestibulum at eros. Praesent commodo cursus
-              magna, vel scelerisque nisl consectetur et. Cras mattis
-              consectetur purus sit amet fermentum. Cras justo odio, dapibus ac
-              facilisis in, egestas eget quam. Morbi leo risus, porta ac
-              consectetur ac, vestibulum at eros. Praesent commodo cursus magna,
-              vel scelerisque nisl consectetur et. Cras mattis consectetur purus
-              sit amet fermentum. Cras justo odio, dapibus ac facilisis in,
-              egestas eget quam. Morbi leo risus, porta ac consectetur ac,
-              vestibulum at eros. Praesent commodo cursus magna, vel scelerisque
-              nisl consectetur et. Cras mattis consectetur purus sit amet
-              fermentum. Cras justo odio, dapibus ac facilisis in, egestas eget
-              quam. Morbi leo risus, porta ac consectetur ac, vestibulum at
-              eros. Praesent commodo cursus magna, vel scelerisque nisl
-              consectetur et. Cras mattis consectetur purus sit amet fermentum.
-              Cras justo odio, dapibus ac facilisis in, egestas eget quam. Morbi
-              leo risus, porta ac consectetur ac, vestibulum at eros. Praesent
-              commodo cursus magna, vel scelerisque nisl consectetur et. Cras
-              mattis consectetur purus sit amet fermentum. Cras justo odio,
-              dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta
-              ac consectetur ac, vestibulum at eros. Praesent commodo cursus
-              magna, vel scelerisque nisl consectetur et. Cras mattis
-              consectetur purus sit amet fermentum. Cras justo odio, dapibus ac
-              facilisis in, egestas eget quam. Morbi leo risus, porta ac
-              consectetur ac, vestibulum at eros. Praesent commodo cursus magna,
-              vel scelerisque nisl consectetur et. Cras mattis consectetur purus
-              sit amet fermentum. Cras justo odio, dapibus ac facilisis in,
-              egestas eget quam. Morbi leo risus, porta ac consectetur ac,
-              vestibulum at eros. Praesent commodo cursus magna, vel scelerisque
-              nisl consectetur et. Cras mattis consectetur purus sit amet
-              fermentum. Cras justo odio, dapibus ac facilisis in, egestas eget
-              quam. Morbi leo risus, porta ac consectetur ac, vestibulum at
-              eros. Praesent commodo cursus magna, vel scelerisque nisl
-              consectetur et. Cras mattis consectetur purus sit amet fermentum.
-              Cras justo odio, dapibus ac facilisis in, egestas eget quam. Morbi
-              leo risus, porta ac consectetur ac, vestibulum at eros. Praesent
-              commodo cursus magna, vel scelerisque nisl consectetur et. Cras
-              mattis consectetur purus sit amet fermentum. Cras justo odio,
-              dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta
-              ac consectetur ac, vestibulum at eros. Praesent commodo cursus
-              magna, vel scelerisque nisl consectetur et. Cras mattis
-              consectetur purus sit amet fermentum. Cras justo odio, dapibus ac
-              facilisis in, egestas eget quam. Morbi leo risus, porta ac
-              consectetur ac, vestibulum at eros. Praesent commodo cursus magna,
-              vel scelerisque nisl consectetur et. Cras mattis consectetur purus
-              sit amet fermentum. Cras justo odio, dapibus ac facilisis in,
-              egestas eget quam. Morbi leo risus, porta ac consectetur ac,
-              vestibulum at eros. Praesent commodo cursus magna, vel scelerisque
-              nisl consectetur et. Cras mattis consectetur purus sit amet
-              fermentum. Cras justo odio, dapibus ac facilisis in, egestas eget
-              quam. Morbi leo risus, porta ac consectetur ac, vestibulum at
-              eros. Praesent commodo cursus magna, vel scelerisque nisl
-              consectetur et.
+              <Stack>
+              <Chip
+                sx={{
+                  height: 40,
+                  maxWidth: "fit-content",
+                  marginTop: 2,
+                  "& .MuiChip-label": {
+                    display: "block",
+                    whiteSpace: "normal"
+                  }
+                }}
+                label="This is a chip that has multiple lines."
+              />
+              <Chip
+                color="primary"
+                sx={{
+                  height: 40,
+                  maxWidth: "fit-content",
+                  marginTop: 2,
+                  alignSelf: "flex-end",
+                  float: "right",
+                  "& .MuiChip-label": {
+                    display: "block",
+                    whiteSpace: "normal"
+                  }
+                }}
+                label="This is a chip that has multiple lines."
+              />
+              </Stack>
+              
             </Box>
+            
             <Box
               sx={{
                 marginTop: 1,
@@ -188,7 +167,12 @@ const MessengerDemo = () => {
                 placeholder="Type a message..."
                 inputProps={{ "aria-label": "Type a message..." }}
               />
-              <IconButton type="button" sx={{ p: "10px" }} color="primary" aria-label="send">
+              <IconButton
+                type="button"
+                sx={{ p: "10px" }}
+                color="primary"
+                aria-label="send"
+              >
                 <SendIcon />
               </IconButton>
             </Box>

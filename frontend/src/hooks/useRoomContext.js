@@ -1,7 +1,7 @@
 import { RoomContext } from '../context/RoomContext'
 import { useContext } from 'react'
 
-export const useChatContext = () => {
+export const useRoomContext = () => {
     const context = useContext(RoomContext)
 
     if (!context) {

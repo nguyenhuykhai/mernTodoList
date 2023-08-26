@@ -8,9 +8,9 @@ const router = express.Router()
 router.use(requireAuth)
 
 // create chat
-router.post('/createRoom', createRoom)
+router.post('/', createRoom)
 
 // find all chats in account
-router.get('/getRooms', getRooms)
+router.get('/', getRooms)
  
 module.exports = router

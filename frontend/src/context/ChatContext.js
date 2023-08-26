@@ -8,9 +8,11 @@ export const chatReducer = (state, action) => {
             return {
                 chat: action.payload
             }
-        case 'CREATE_CHAT':
+        case 'ADD_CHAT':
+            const test = [...state.chat]
+            test[0].messages.push(action.payload)
             return {
-                chat: [action.payload, ...state.chat]
+                chat: test
             }
         default:
             return state

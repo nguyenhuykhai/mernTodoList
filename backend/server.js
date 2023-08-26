@@ -28,32 +28,16 @@ app.use("/api/room", roomRoutes);
 mongoose
   .connect(process.env.MONG_URI)
   .then(() => {
-    // listten for request
+    // Listen for requests
     const server = app.listen(process.env.PORT, () => {
-      console.log("listening on port ", process.env.PORT);
+      console.log("Listening on port ", process.env.PORT);
     });
 
-    const io = require('socket.io')(server, {
-      pingTimeout: 60000,
-      cors: {
-        origin: "http://localhost:3000",
-      },
-    });
+    const { setupSocket } = require('./socketManager');
+    setupSocket(server);
 
-    io.on("connection", (socket) => {
-      console.log("connection ", socket.id);
-
-      socket.on('setup', (userData) => {
-        socket.join(userData._id);
-        console.log(userData._id);
-        socket.emit('connected');
-      })
-
-      socket.on('join chat', () => {
-        socket.join(room)
-        console.log("User joined room ", + room);
-      })
-    });
+    // Export the io instance within the promise block
+    module.exports = { io };
   })
   .catch((error) => {
     console.log(error);

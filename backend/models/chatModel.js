@@ -10,15 +10,25 @@ const chatMessageSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  email: {
+    type: String,
+    required: true
+  },
 }, {
   timestamps: true
 });
 
 const chatSchema = new mongoose.Schema({
   participants: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+    user_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    email: {
+      type: String,
+      required: true
+    }
   }],
   messages: [chatMessageSchema],
   room_id: {

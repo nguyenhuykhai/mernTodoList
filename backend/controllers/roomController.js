@@ -14,9 +14,8 @@ const createRoom = async (req, res) => {
 
 // get all room
 const getRooms = async (req, res) => {
-    const { user_id } = req.body;
     try {
-        const rooms = await Room.find({ members: user_id });
+        const rooms = await Room.find({});
         res.status(200).json(rooms);
     } catch (error) {
         res.status(404).json({ error: error.message });
