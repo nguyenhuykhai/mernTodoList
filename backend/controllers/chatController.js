@@ -2,7 +2,6 @@ const Chat = require('../models/chatModel')
 const mongoose = require('mongoose')
 const { ObjectId } = require('mongodb');
 const { getIOInstance } = require('../socketManager'); 
-const io = getIOInstance();
 
 // create new chat
 const createChat = async (req, res) => {
@@ -23,6 +22,7 @@ const getChats = async (req, res) => {
         const chats = await Chat.find({ room_id: room_id}).sort({createdAt:-1})
         
         // Emit the new message to the chat room using socket.io
+        const io = getIOInstance();
         io.to(room_id).emit('userJoined', user_id);
         res.status(200).json(chats)
     } catch (error) {
@@ -51,6 +51,7 @@ const updateChatWithNewMessage = async (req, res) => {
         );
 
         // Emit the new message to the chat room using socket.io
+        const io = getIOInstance();
         io.emit('newMessage', newMessage);
         res.status(200)
     } catch (error) {

@@ -35,9 +35,6 @@ mongoose
 
     const { setupSocket } = require('./socketManager');
     setupSocket(server);
-
-    // Export the io instance within the promise block
-    module.exports = { io };
   })
   .catch((error) => {
     console.log(error);
