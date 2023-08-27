@@ -20,10 +20,6 @@ const getChats = async (req, res) => {
     const user_id = req.user._id;
     try {
         const chats = await Chat.find({ room_id: room_id}).sort({createdAt:-1})
-        
-        // Emit the new message to the chat room using socket.io
-        const io = getIOInstance();
-        io.to(room_id).emit('userJoined', user_id);
         res.status(200).json(chats)
     } catch (error) {
         res.status(404).json({error: error.message})
@@ -32,7 +28,7 @@ const getChats = async (req, res) => {
 
 // add messages into chat
 const updateChatWithNewMessage = async (req, res) => {
-    const { _id, message, email } = req.body
+    const { _id, message, email, room_id } = req.body
     const user_id = req.user._id
         const newMessage = {
             _id: new ObjectId(),
@@ -49,10 +45,11 @@ const updateChatWithNewMessage = async (req, res) => {
             { _id: chatId },
             { $push: { messages: newMessage } }
         );
+        updateResult
 
         // Emit the new message to the chat room using socket.io
         const io = getIOInstance();
-        io.emit('newMessage', newMessage);
+        io.to(room_id).emit('newMessage', newMessage);
         res.status(200)
     } catch (error) {
         res.status(404).json({error: error.message})

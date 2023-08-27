@@ -3,9 +3,12 @@ import { Fragment } from "react";
 import { useEffect, useState } from "react";
 import { useNavigate, redirect } from "react-router-dom";
 import io from "socket.io-client";
-import { useRoomContext } from "../hooks/useRoomContext";
-import { useChatContext } from "../hooks/useChatContext";
-import { useAuthContext } from "../hooks/useAuthContext";
+import { useRoomContext } from "../../hooks/useRoomContext";
+import { useChatContext } from "../../hooks/useChatContext";
+import { useAuthContext } from "../../hooks/useAuthContext";
+
+//IMPORT COMPONENT
+import AddRoom from "./AddRoom";
 
 //IMPORT MUI
 import { styled } from "@mui/material/styles";
@@ -32,8 +35,9 @@ import {
 import IconButton from "@mui/material/IconButton";
 import SendIcon from "@mui/icons-material/Send";
 
+
 const ENDPOINT = "http://localhost:4000";
-var socket;
+var socket = io(ENDPOINT);
 
 const messages = [
   { id: 1, text: "Hi there!", sender: "bot" },
@@ -75,7 +79,6 @@ const ChatUI = () => {
 
   // Set connect with socket
   useEffect(() => {
-    socket = io(ENDPOINT);
     socket.on("connection", () => {
       setSocketConnected(true);
     });
@@ -83,6 +86,10 @@ const ChatUI = () => {
     socket.on("newMessage", (newMessage) => {
       console.log("New message:", newMessage);
       dispatchChat({ type: "ADD_CHAT", payload: newMessage });
+    });
+
+    socket.on("userJoined", (user) => {
+      console.log("User joined: ", user);
     });
   }, []);
 
@@ -108,7 +115,11 @@ const ChatUI = () => {
         currentUser(json);
       }
     };
-    if (user) {
+
+    // If user already exists in room then will pass this case
+    if (user && r.name !== roomName) {
+      console.log("SOCKET EMIT");
+      socket.emit("userJoinedRoom", r);
       fetchChat();
     }
   };
@@ -121,11 +132,12 @@ const ChatUI = () => {
   // Handle submit messenger
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    console.log(e.target)
+    console.log(e.target);
     const newMessage = {
       _id: chat[0]._id,
       message: text,
       email: currentUser.email,
+      room_id: chat[0].room_id,
     };
     setText("");
     inputText.focus();
@@ -173,6 +185,9 @@ const ChatUI = () => {
                 bgcolor: "background.paper",
               }}
             >
+              <Box textAlign="center" paddingY={2} >
+                <AddRoom />
+              </Box>
               {room &&
                 room.map((r, index) => (
                   <Fragment key={index}>
@@ -279,7 +294,7 @@ const ChatUI = () => {
                   )}
               </Stack>
             </Box>
-            <form onSubmit={e => handleSendMessage(e)}>
+            <form onSubmit={(e) => handleSendMessage(e)}>
               <Box
                 sx={{
                   marginTop: 1,

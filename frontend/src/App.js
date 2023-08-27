@@ -5,8 +5,7 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Navbar from './components/Navbar'
-import ChatUI from './pages/Chat'
-import MessengerDemo from './pages/Messenger'
+import ChatUI from './pages/Messenger/Chat'
 
 function App() {
   const { user } = useAuthContext()
