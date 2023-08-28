@@ -6,8 +6,12 @@ const { getIOInstance } = require('../socketManager');
 // create new chat
 const createChat = async (req, res) => {
     const {participants, messages, room_id} = req.body
+    const _id = new ObjectId(room_id);
     try {
-        const chat = await Chat.create({ participants, messages, room_id })
+        const chat = await Chat.create({ participants, messages, room_id: _id })
+        // Emit the new message to the chat room using socket.io
+        const io = getIOInstance();
+        io.to(room_id).emit('addNewChatCollection', [chat]);
         res.status(200).json(chat)
     } catch (error) {
         res.status(404).json({error: error.message})

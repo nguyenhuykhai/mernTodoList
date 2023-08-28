@@ -6,6 +6,7 @@ import io from "socket.io-client";
 import { useRoomContext } from "../../hooks/useRoomContext";
 import { useChatContext } from "../../hooks/useChatContext";
 import { useAuthContext } from "../../hooks/useAuthContext";
+import { useAddNewChat } from '../../hooks/useAddNewChat'
 
 //IMPORT COMPONENT
 import AddRoom from "./AddRoom";
@@ -35,7 +36,6 @@ import {
 import IconButton from "@mui/material/IconButton";
 import SendIcon from "@mui/icons-material/Send";
 
-
 const ENDPOINT = "http://localhost:4000";
 var socket = io(ENDPOINT);
 
@@ -46,6 +46,7 @@ const messages = [
 ];
 
 const ChatUI = () => {
+  const { addChat } = useAddNewChat()
   const navigate = useNavigate();
   const { room, dispatch } = useRoomContext();
   const { user } = useAuthContext();
@@ -75,7 +76,7 @@ const ChatUI = () => {
     if (user) {
       fetchRoom();
     }
-  }, [dispatch, user]);
+  }, [dispatch, user, room]);
 
   // Set connect with socket
   useEffect(() => {
@@ -91,6 +92,11 @@ const ChatUI = () => {
     socket.on("userJoined", (user) => {
       console.log("User joined: ", user);
     });
+
+    socket.on("addNewChatCollection", (chatCollection) => {
+      dispatchChat({ type: "SET_CHAT", payload: chatCollection });
+      console.log(chatCollection)
+    })
   }, []);
 
   // Handle click on item room chat
@@ -104,15 +110,18 @@ const ChatUI = () => {
       const json = await response.json();
       if (response.ok) {
         dispatchChat({ type: "SET_CHAT", payload: json });
+        console.log(json)
         setRoomName(r.name);
-        const currentUser = (json) => {
-          json[0].participants.map((item) => {
-            if (item.email === user.email) {
-              setCurrentUser(item);
-            }
-          });
-        };
-        currentUser(json);
+        if (json.length > 0 && json[0].hasOwnProperty("participants")) {
+          const currentUser = (json) => {
+            json[0].participants.map((item) => {
+              if (item.email === user.email) {
+                setCurrentUser(item);
+              }
+            });
+          };
+          currentUser(json);
+        }
       }
     };
 
@@ -133,30 +142,41 @@ const ChatUI = () => {
   const handleSendMessage = async (e) => {
     e.preventDefault();
     console.log(e.target);
-    const newMessage = {
-      _id: chat[0]._id,
-      message: text,
-      email: currentUser.email,
-      room_id: chat[0].room_id,
-    };
-    setText("");
-    inputText.focus();
 
-    const response = await fetch("/api/chat/addMessage", {
-      method: "PUT",
-      body: JSON.stringify(newMessage),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${user.token}`,
-      },
-    });
-    const json = await response.json();
+    // CASE 1: IF CHAT ALREADY EXISTS
+    if (chat[0] !== undefined) {
+      const newMessage = {
+        _id: chat[0]._id,
+        message: text,
+        email: currentUser.email,
+        room_id: chat[0].room_id,
+      };
 
-    if (!response.ok) {
-      console.log(json.error);
-    }
-    if (response.ok) {
-      console.log(json);
+      setText("");
+      inputText.focus();
+
+      const response = await fetch("/api/chat/addMessage", {
+        method: "PUT",
+        body: JSON.stringify(newMessage),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+
+      const json = await response.json();
+
+      if (!response.ok) {
+        console.log(json.error);
+      }
+      if (response.ok) {
+        console.log(json);
+      }
+    // CASE 2: IF CHAT DO NOT EXISTS
+    } else {
+      addChat(room, roomName, text, user)
+      setText("");
+      inputText.focus();
     }
   };
 
@@ -185,7 +205,7 @@ const ChatUI = () => {
                 bgcolor: "background.paper",
               }}
             >
-              <Box textAlign="center" paddingY={2} >
+              <Box textAlign="center" paddingY={2}>
                 <AddRoom />
               </Box>
               {room &&
@@ -244,7 +264,7 @@ const ChatUI = () => {
               <Stack direction="column" spacing={1}>
                 {currentUser &&
                   chat &&
-                  chat[0].messages.map((item, index) =>
+                  chat[0]?.messages.map((item, index) =>
                     item.email === currentUser.email ? (
                       <Box key={index} textAlign="right">
                         <Typography

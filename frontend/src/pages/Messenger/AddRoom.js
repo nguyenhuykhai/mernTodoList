@@ -68,7 +68,17 @@ export default function AddRoom() {
 
       if (response.ok) {
         dispatch({ type: "SET_USER", payload: json.users });
-        setChipData(json.users);
+
+        // Function to handle set main user
+        const mainUser = (data) => {
+          data.map(item => {
+            if(item.email === user.email) {
+              console.log(item)
+              setChipData([item])
+            }
+          })
+        }
+        mainUser(json.users)
       }
     };
 
@@ -77,6 +87,7 @@ export default function AddRoom() {
     }
   }, [dispatch]);
 
+  // Function to handle when add user to new room 
   const handleChange = (event) => {
     let check = false;
     chipData.map((chip) => {
@@ -93,10 +104,27 @@ export default function AddRoom() {
     setNewRoom(e.target.value);
   }
 
-  const handleAddRoom = (e) => {
+  const handleAddRoom = async (e) => {
     e.preventDefault();
+    const dataRoom = { name: newRoom, members: chipData }
 
-    console.log("FORM: ", e.target.value)
+    const response = await fetch('/api/room', {
+        method: 'POST',
+        body: JSON.stringify(dataRoom),
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${user.token}`
+        }
+    })
+    const json = await response.json();
+
+    if (!response.ok) {
+        console.log(json.error);
+    }
+    if (response.ok) {
+        console.log("Success: ", json);
+        dispatch({type: 'CREATE_ROOM', payload: json})
+    }
   }
 
   return (
