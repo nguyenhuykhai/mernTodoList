@@ -6,7 +6,7 @@ export const userReducer = (state, action) => {
     switch (action.type) {
         case 'SET_USER':
             return {
-                room: action.payload
+                userList: action.payload
             }
         default:
             return state

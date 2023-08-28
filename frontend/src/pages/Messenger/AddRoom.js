@@ -1,6 +1,7 @@
 import * as React from "react";
 import { useUserContext } from "../../hooks/useUserContext";
 import { useAuthContext } from "../../hooks/useAuthContext";
+import { useEffect, useState } from "react";
 
 // IMPORT MUI
 import { styled } from "@mui/material/styles";
@@ -12,6 +13,11 @@ import {
   TextField,
   Chip,
   Paper,
+  Select,
+  FormControl,
+  MenuItem,
+  InputLabel,
+  OutlinedInput,
 } from "@mui/material";
 import TagFacesIcon from "@mui/icons-material/TagFaces";
 import AddBoxIcon from "@mui/icons-material/AddBox";
@@ -33,24 +39,21 @@ const ListItem = styled("li")(({ theme }) => ({
 }));
 
 export default function AddRoom() {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const { userList, dispatch } = useRoomContext();
+  const { userList, dispatch } = useUserContext();
   const { user } = useAuthContext();
-  const [chipData, setChipData] = React.useState([
-    { key: 0, label: "Angular" },
-    { key: 1, label: "jQuery" },
-    { key: 2, label: "Polymer" },
-    { key: 3, label: "React" },
-    { key: 4, label: "Vue.js" },
-  ]);
-
+  const [chipData, setChipData] = useState([]);
+  const [newRoom, setNewRoom] = useState("");
+  
   const handleDelete = (chipToDelete) => () => {
-    setChipData((chips) =>
-      chips.filter((chip) => chip.key !== chipToDelete.key)
-    );
+    const handle = (chipData) => {
+      const item = chipData.filter((chip) => chip._id !== chipToDelete._id);
+      setChipData(item);
+    };
+    handle(chipData);
   };
 
   // Get all users
@@ -64,16 +67,37 @@ export default function AddRoom() {
       const json = await response.json();
 
       if (response.ok) {
-        dispatch({ type: "SET_USER", payload: json });
+        dispatch({ type: "SET_USER", payload: json.users });
+        setChipData(json.users);
       }
     };
 
     if (user) {
       fetchUser();
     }
-  }, [dispatch, userList]);
+  }, [dispatch]);
 
-  console.log(userList);
+  const handleChange = (event) => {
+    let check = false;
+    chipData.map((chip) => {
+      if (chip._id === event.target.value._id) {
+        check = true;
+      }
+    });
+    if (!check) {
+      setChipData([...chipData, event.target.value]);
+    }
+  };
+
+  const handleInputName = (e) => {
+    setNewRoom(e.target.value);
+  }
+
+  const handleAddRoom = (e) => {
+    e.preventDefault();
+
+    console.log("FORM: ", e.target.value)
+  }
 
   return (
     <div>
@@ -90,43 +114,71 @@ export default function AddRoom() {
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
-        <Box sx={style}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            Text in a modal
-          </Typography>
-          <Paper
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              flexWrap: "wrap",
-              listStyle: "none",
-              p: 0.5,
-              m: 0,
-            }}
-            component="ul"
-          >
-            {chipData.map((data) => {
-              let icon;
+        <form onSubmit={(e) => handleAddRoom(e)}>
+          <Box sx={style}>
+            <Typography id="modal-modal-title" variant="h6" component="h2">
+              Add New Room
+            </Typography>
+            <Paper
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                flexWrap: "wrap",
+                listStyle: "none",
+                p: 0.5,
+                m: 0,
+              }}
+              component="ul"
+            >
+              {chipData &&
+                chipData.map((data) => {
+                  return (
+                    <ListItem key={data._id}>
+                      <Chip
+                        label={data.email}
+                        onDelete={
+                          user.email === data.email
+                            ? undefined
+                            : handleDelete(data)
+                        }
+                      />
+                    </ListItem>
+                  );
+                })}
+            </Paper>
 
-              if (data.label === "React") {
-                icon = <TagFacesIcon />;
-              }
+            <FormControl sx={{ marginTop: 4, width: "100%" }}>
+              <InputLabel id="demo-multiple-name-label">Select</InputLabel>
+              <Select
+                labelId="demo-multiple-name-label"
+                id="demo-multiple-name"
+                value=""
+                onChange={handleChange}
+                input={<OutlinedInput label="Name" />}
+              >
+                {userList &&
+                  userList.map((data) => (
+                    <MenuItem key={data._id} value={data}>
+                      {data.email}
+                    </MenuItem>
+                  ))}
+              </Select>
+            </FormControl>
 
-              return (
-                <ListItem key={data.key}>
-                  <Chip
-                    icon={icon}
-                    label={data.label}
-                    onDelete={
-                      data.label === "React" ? undefined : handleDelete(data)
-                    }
-                  />
-                </ListItem>
-              );
-            })}
-          </Paper>
-          <TextField id="outlined-basic" label="Room Name" variant="outlined" />
-        </Box>
+            <TextField
+              id="outlined-basic"
+              value={newRoom}
+              onChange={handleInputName}
+              label="Room Name"
+              variant="outlined"
+              sx={{ marginTop: 4, width: "100%" }}
+            />
+
+            <Button sx={{marginTop: 2}} variant="contained" type="submit">
+              Create Room
+            </Button>
+          </Box>
+        </form>
       </Modal>
     </div>
   );
