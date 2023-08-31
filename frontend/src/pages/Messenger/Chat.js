@@ -53,6 +53,7 @@ const ChatUI = () => {
   const { chat, dispatch: dispatchChat } = useChatContext();
 
   const [roomName, setRoomName] = useState();
+  const [roomId, setRoomId] = useState();
   const [currentUser, setCurrentUser] = useState({});
   const [text, setText] = useState("");
   const [socketConnected, setSocketConnected] = useState(false);
@@ -84,18 +85,23 @@ const ChatUI = () => {
       setSocketConnected(true);
     });
 
-    socket.on("newMessage", (newMessage) => {
-      console.log("New message:", newMessage);
-      dispatchChat({ type: "ADD_CHAT", payload: newMessage });
+    socket.on("newMessage", ({ room_id, newMessage }) => {
+      dispatchChat({ type: "ADD_CHAT", payload: { room_id, newMessage } });
     });
 
-    socket.on("userJoined", (user) => {
-      console.log("User joined: ", user);
-    });
+    socket.on("addNewChatCollection", ({ room_id, chat, room }) => {
+      console.log("addNewChatCollection - room Name: ", room)
+      dispatchChat({ type: "SET_NEW_CHAT", payload: { room_id, chat } });
+    })
 
-    socket.on("addNewChatCollection", (chatCollection) => {
-      dispatchChat({ type: "SET_CHAT", payload: chatCollection });
-      console.log(chatCollection)
+    socket.on("message", (args) => {
+      console.log(args)
+    })
+
+    socket.on("roomUsers", ({room, users}) => {
+      console.log("GET ROOM INFORMATION")
+      console.log(room)
+      console.log(users)
     })
   }, []);
 
@@ -109,9 +115,9 @@ const ChatUI = () => {
       });
       const json = await response.json();
       if (response.ok) {
-        dispatchChat({ type: "SET_CHAT", payload: json });
-        console.log(json)
+        dispatchChat({ type: "SET_CHAT", payload: { room_id: r._id, chat: json } });
         setRoomName(r.name);
+        setRoomId(r._id);
         if (json.length > 0 && json[0].hasOwnProperty("participants")) {
           const currentUser = (json) => {
             json[0].participants.map((item) => {
@@ -128,7 +134,8 @@ const ChatUI = () => {
     // If user already exists in room then will pass this case
     if (user && r.name !== roomName) {
       console.log("SOCKET EMIT");
-      socket.emit("userJoinedRoom", r);
+      socket.emit("unsubscribe", roomId );
+      socket.emit("subscribe", {arg: r, user})
       fetchChat();
     }
   };

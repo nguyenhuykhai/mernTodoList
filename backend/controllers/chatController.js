@@ -2,6 +2,12 @@ const Chat = require('../models/chatModel')
 const mongoose = require('mongoose')
 const { ObjectId } = require('mongodb');
 const { getIOInstance } = require('../socketManager'); 
+const {
+    userJoin,
+    getCurrentUser,
+    userLeave,
+    getRoomUsers,
+  } = require("../utils/users.js");
 
 // create new chat
 const createChat = async (req, res) => {
@@ -11,7 +17,8 @@ const createChat = async (req, res) => {
         const chat = await Chat.create({ participants, messages, room_id: _id })
         // Emit the new message to the chat room using socket.io
         const io = getIOInstance();
-        io.to(room_id).emit('addNewChatCollection', [chat]);
+        const data = getRoomUsers(room_id)
+        io.to(room_id).emit('addNewChatCollection', { room_id, chat: [chat], room: data });
         res.status(200).json(chat)
     } catch (error) {
         res.status(404).json({error: error.message})
@@ -53,7 +60,7 @@ const updateChatWithNewMessage = async (req, res) => {
 
         // Emit the new message to the chat room using socket.io
         const io = getIOInstance();
-        io.to(room_id).emit('newMessage', newMessage);
+        io.to(room_id).emit('newMessage', { room_id, newMessage });
         res.status(200)
     } catch (error) {
         res.status(404).json({error: error.message})

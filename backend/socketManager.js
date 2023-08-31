@@ -1,4 +1,10 @@
 const socketIO = require("socket.io");
+const {
+  userJoin,
+  getCurrentUser,
+  userLeave,
+  getRoomUsers,
+} = require("./utils/users.js");
 
 let ioInstance;
 
@@ -13,17 +19,33 @@ function setupSocket(server) {
   ioInstance.on("connection", (socket) => {
     console.log("Connection ", socket.id);
 
-    socket.on("setup", (userData) => {
-      socket.join(userData._id);
-      console.log(userData._id);
-      socket.emit("connected");
+    // When client subscribe room
+    socket.on("subscribe", ({arg, user}) => {
+      const data = userJoin(socket.id, user.email, arg._id)
+      socket.join(data.room);
+      ioInstance.to(data.room).emit("message", `${data.username} has join the chat`);
     });
 
-    socket.on("userJoinedRoom", (arg) => {
-      const room = arg._id;
-      console.log(room);
-      socket.join(room);
-      ioInstance.to(room).emit("userJoined", "JOIN");
+    // When client unsubscribe room
+    socket.on('unsubscribe', (roomId) => {
+      console.log(`User is unsubscribing from room: ${roomId}`);
+      socket.leave(roomId);
+    });
+
+    // Runs when client disconnects
+    socket.on("disconnect", () => {
+      const data = userLeave(socket.id);
+      if (data) {
+        socket.to(data.room).emit(
+          "message", `${data.username} has left the chat`
+        );
+
+        // Send users and room info
+        socket.to(data.room).emit("roomUsers", {
+          room: data.room,
+          users: getRoomUsers(data.room),
+        });
+      }
     });
   });
 }
