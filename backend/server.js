@@ -25,8 +25,10 @@ app.use("/api/chat", chatRoutes);
 app.use("/api/room", roomRoutes);
 
 // connect to db
-mongoose
-  .connect(process.env.MONG_URI)
+  mongoose.connect('mongodb://127.0.0.1:27017/chatRealTime', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => {
     // Listen for requests
     const server = app.listen(process.env.PORT, () => {
